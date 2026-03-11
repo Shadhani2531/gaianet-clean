@@ -1,14 +1,17 @@
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+from typing import Dict, Any, List
+
 
 class EnvironmentalData(BaseModel):
     temperature: Dict[str, Any]
     co2: Dict[str, Any]
     vegetation: Dict[str, Any]
     biodiversity: Dict[str, Any]
+    weather: Dict[str, Any]
     last_updated: str
     data_sources: List[str]
+    is_live: bool
+
 
 class NASAImagery(BaseModel):
     date: str
@@ -16,11 +19,14 @@ class NASAImagery(BaseModel):
     coordinates: Dict[str, float]
     caption: str
     source: str
+    is_live: bool
+
 
 class WeatherData(BaseModel):
     current: Dict[str, Any]
     forecast: Dict[str, Any]
     alerts: Dict[str, Any]
+
 
 class GaiaNetStatus(BaseModel):
     system: str
