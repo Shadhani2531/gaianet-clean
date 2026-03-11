@@ -10,6 +10,9 @@ function App() {
     temperature: 0.7,
     vegetation: 0.6,
     co2: 0.5,
+    air_quality: 0.5,
+    fires: 0.6,
+    night_lights: 0.5,
   });
 
   const handleOpacityChange = (layerId, opacity) => {
