@@ -9,24 +9,24 @@ function App() {
   const [layerOpacities, setLayerOpacities] = useState({
     temperature: 0.7,
     vegetation: 0.6,
-    co2: 0.5
+    co2: 0.5,
   });
 
   const handleOpacityChange = (layerId, opacity) => {
-    setLayerOpacities(prev => ({
+    setLayerOpacities((prev) => ({
       ...prev,
-      [layerId]: parseFloat(opacity)
+      [layerId]: parseFloat(opacity),
     }));
   };
 
   return (
     <div className="app-container">
-      <Earth />
-      
+      <Earth activeLayers={activeLayers} layerOpacities={layerOpacities} />
+
       <div className="ui-overlay">
         <div className="data-layers-container">
-          <DataLayersPanel 
-            activeLayers={activeLayers} 
+          <DataLayersPanel
+            activeLayers={activeLayers}
             onLayersChange={setActiveLayers}
             layerOpacities={layerOpacities}
             onOpacityChange={handleOpacityChange}
