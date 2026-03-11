@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://symmetrical-space-halibut-pjwqqrp9j495h6rw-8000.app.github.dev';
 
 class ApiService {
   constructor() {
