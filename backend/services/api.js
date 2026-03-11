@@ -22,65 +22,134 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error(`API request failed for ${endpoint}:`, error);
       throw error;
     }
   }
 
-  // Health check
+  // Basic health/system routes
   async healthCheck() {
     return this.request('/health');
   }
 
-  // Environmental data
-  async getCurrentEnvironment() {
-    return this.request('/api/environment/current');
+  async getSystemStatus() {
+    return this.request('/api/gaianet/status');
   }
 
-  async getEnvironmentMetrics() {
-    return this.request('/api/environment/metrics');
+  // Main environmental data
+  async getEnvironmentalData() {
+    return this.request('/api/environment/data');
   }
 
-  // Data layers
-  async getAvailableLayers() {
-    return this.request('/api/layers');
+  async getWeatherData() {
+    return this.request('/api/nasa/weather');
   }
 
-  async toggleLayer(layerId, active) {
-    return this.request(`/api/layers/${layerId}/toggle`, {
-      method: 'POST',
-      body: JSON.stringify({ active }),
-    });
+  async getNASAImagery(lat = 40.7128, lon = -74.0060, date = null) {
+    let endpoint = `/api/nasa/imagery?lat=${lat}&lon=${lon}`;
+    if (date) {
+      endpoint += `&date=${date}`;
+    }
+    return this.request(endpoint);
   }
 
-  // Satellite data
-  async getSatelliteImagery() {
-    return this.request('/api/satellite/imagery');
+  // Region and trend datasets
+  async getRegionData() {
+    return this.request('/api/environment/regions');
   }
 
-  // Fallback data for offline development
-  getFallbackMetrics() {
+  async getTrendData() {
+    return this.request('/api/environment/trends');
+  }
+
+  // Optional static fallback data
+  getFallbackEnvironmentalData() {
     return {
-      metrics: {
-        global_temperature: { value: 15.2, unit: '°C', change: '+1.1', trend: 'rising' },
-        co2_concentration: { value: 417.5, unit: 'ppm', change: '+2.5', trend: 'rising' },
-        sea_level_rise: { value: 3.4, unit: 'mm/year', change: '+0.3', trend: 'rising' },
-        forest_cover_loss: { value: 10.1, unit: 'M hectares/year', change: '-0.2', trend: 'improving' },
-        biodiversity_index: { value: 76.0, unit: '%', change: '-2.1', trend: 'declining' }
+      temperature: {
+        global_average: 15.0,
+        anomaly: 1.1,
+        trend: 'increasing',
+        unit: '°C',
+        last_measured: new Date().toISOString(),
       },
-      last_updated: new Date().toISOString()
+      co2: {
+        value: 417.0,
+        unit: 'ppm',
+        trend: 'rising',
+        source: 'Fallback Data',
+      },
+      vegetation: {
+        ndvi_global: 0.4,
+        health_index: 75.0,
+        trend: 'stable',
+        source: 'Fallback Data',
+      },
+      biodiversity: {
+        species_richness: 8.0,
+        threat_level: 'moderate',
+        protected_areas: 15.0,
+        alert_level: 'normal',
+      },
+      weather: {
+        current: {
+          temperature: 20.0,
+          humidity: 60,
+          pressure: 1013,
+          wind_speed: 5.0,
+          conditions: 'clear',
+          location: 'Global',
+          source: 'Fallback Data',
+        },
+        forecast: {
+          trend: 'stable',
+          confidence: 0.8,
+        },
+        alerts: {
+          heat_wave: false,
+          storm_watch: false,
+          air_quality: 'good',
+        },
+      },
+      last_updated: new Date().toISOString(),
+      data_sources: ['Fallback Data'],
+      is_live: false,
     };
   }
 
-  getFallbackEnvironment() {
+  getFallbackRegionData() {
     return {
-      temperature: 15.2,
-      co2_levels: 417.5,
-      deforestation_rate: 0.08,
-      biodiversity_index: 0.76,
-      air_quality: 85.2,
-      sea_level_rise: 3.4,
-      timestamp: new Date().toISOString()
+      regions: [
+        {
+          region: 'India',
+          temperature: 24.6,
+          aqi: 128,
+          vegetation_index: 0.52,
+          co2: 420.3,
+          rainfall: 118,
+          risk_level: 'moderate',
+        },
+        {
+          region: 'Europe',
+          temperature: 10.8,
+          aqi: 65,
+          vegetation_index: 0.58,
+          co2: 414.7,
+          rainfall: 84,
+          risk_level: 'low',
+        },
+      ],
+      last_updated: new Date().toISOString(),
+    };
+  }
+
+  getFallbackTrendData() {
+    return {
+      trends: {
+        temperature_last_6_months: [14.2, 14.4, 14.6, 14.8, 15.0, 15.1],
+        co2_last_6_months: [414.1, 414.8, 415.5, 416.1, 416.6, 417.0],
+        vegetation_last_6_months: [0.43, 0.42, 0.41, 0.4, 0.4, 0.39],
+      },
+      last_updated: new Date().toISOString(),
     };
   }
 }
