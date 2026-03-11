@@ -1,24 +1,22 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from datetime import datetime
-import asyncio
 from nasa_client import NASAClient
-from data_models import EnvironmentalData, NASAImagery, WeatherData
+from data_models import EnvironmentalData, NASAImagery, WeatherData, GaiaNetStatus
+from static_data import get_region_environmental_data, get_environmental_trends
 
 app = FastAPI(title="GaiaNet API", version="1.0.0")
 
-# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Vite default
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize NASA client
 nasa_client = NASAClient()
+
 
 @app.get("/")
 async def root():
@@ -29,48 +27,66 @@ async def root():
         "timestamp": datetime.now().isoformat()
     }
 
+
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat()
+    }
 
-@app.get("/api/environment/data")
+
+@app.get("/api/environment/data", response_model=EnvironmentalData)
 async def get_environmental_data():
-    """Get comprehensive environmental data"""
     try:
-        data = await nasa_client.get_environmental_data()
-        return JSONResponse(content=data)
+        return await nasa_client.get_environmental_data()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching environmental data: {str(e)}")
 
-@app.get("/api/nasa/imagery")
+
+@app.get("/api/nasa/imagery", response_model=NASAImagery)
 async def get_nasa_imagery(lat: float = 40.7128, lon: float = -74.0060, date: str = None):
-    """Get NASA Earth imagery"""
     try:
-        imagery_data = await nasa_client.get_earth_imagery(lat, lon, date)
-        return JSONResponse(content=imagery_data)
+        return await nasa_client.get_earth_imagery(lat, lon, date)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching NASA imagery: {str(e)}")
 
-@app.get("/api/nasa/weather")
+
+@app.get("/api/nasa/weather", response_model=WeatherData)
 async def get_weather_data():
-    """Get weather and climate data"""
     try:
-        weather_data = await nasa_client.get_weather_data()
-        return JSONResponse(content=weather_data)
+        return await nasa_client.get_weather_data()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching weather data: {str(e)}")
 
-@app.get("/api/gaianet/status")
+
+@app.get("/api/environment/regions")
+async def get_region_data():
+    return {
+        "regions": get_region_environmental_data(),
+        "last_updated": datetime.now().isoformat()
+    }
+
+
+@app.get("/api/environment/trends")
+async def get_trend_data():
+    return {
+        "trends": get_environmental_trends(),
+        "last_updated": datetime.now().isoformat()
+    }
+
+
+@app.get("/api/gaianet/status", response_model=GaiaNetStatus)
 async def get_gaianet_status():
-    """Get GaiaNet system status"""
     return {
         "system": "GaiaNet Planetary Intelligence",
         "status": "operational",
         "earth_visualization": "active",
-        "data_streams": ["environmental", "imagery", "weather"],
+        "data_streams": ["environmental", "imagery", "weather", "regions", "trends"],
         "last_data_update": datetime.now().isoformat(),
         "version": "1.0.0"
     }
+
 
 if __name__ == "__main__":
     import uvicorn
